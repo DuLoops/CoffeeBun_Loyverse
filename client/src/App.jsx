@@ -1,34 +1,24 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {Link, Outlet} from 'react-router-dom'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const menu = ['Baker', 'Baristar', 'Customer']
 
+  const handleClick = (e) => {
+  }
+  
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className='w-4/5 m-auto'>
+      <h1 className="my-10">The Coffee Bun</h1>
+      <ul className='flex flex-row gap-2 flex-col'>
+      {menu.map((item, index) => (
+        <li className='bg-blue-500 hover:bg-blue-700 text-white font-bold rounded' key={index}>
+          <Link className='block w-full my-2' to={`${item.toLowerCase()}`}>{item}</Link>
+        </li>
+      ))}
+      </ul>
+    </div>
   )
 }
 
