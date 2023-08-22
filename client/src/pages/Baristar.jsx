@@ -5,6 +5,8 @@ import {collection, query, doc, onSnapshot, updateDoc } from 'firebase/firestore
 export default function Baristar() {
 
   const [inventory, setInvetory] = useState([])
+  const [showInventory, setShowInventory] = useState(false)
+
   
   useEffect(()=> {
     const q = query(collection(db, "buns"))
@@ -31,7 +33,7 @@ export default function Baristar() {
   return (
     <div >
       <h1 className='my-5'>Inventory</h1>
-      <div className='grid grid-cols-4 gap-3'>
+      <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
         {inventory.map((item) => (
           <div key={item.id} className='flex flex-col items-center border'>
             <p>{item.name}</p>
@@ -39,6 +41,7 @@ export default function Baristar() {
           </div>
         ))}
       </div>
+      <button className='my-5 border border-orange-300 p-2' onClick={() =>setShowInventory(!showInventory)}>{showInventory ? 'Hide' : "Show"} CDS Inventory</button>
     </div>
   )
 }

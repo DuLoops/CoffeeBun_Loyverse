@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { db } from '../api/firebase'
-import { collection, query, doc, onSnapshot, updateDoc, orderBy, increment, writeBatch } from 'firebase/firestore'
+import { collection, query, doc, onSnapshot, updateDoc, orderBy, increment, getDocs, writeBatch } from 'firebase/firestore'
+import BakerSales from '../components/BakerSales'
 
 
 export default function Baker() {
@@ -8,6 +9,7 @@ export default function Baker() {
   const [inventory, setInventory] = useState([])
   const [selectedInventory, setSelectedInventory] = useState([])
   const controllerOptions = [-1, 1, 3, 6]
+  const [sales, setSales] = useState([])
 
   useEffect(() => {
     const q = query(collection(db, "buns"), orderBy('order'))
@@ -18,9 +20,24 @@ export default function Baker() {
         upodatedInventory.push({ id: doc.id, ...doc.data() })
       })
       setInventory(upodatedInventory)
+      updatesales()
     })
     return () => unsub()
   }, [])
+
+  const updatesales = async () => {
+    const newsales = []
+    const q = query(collection(db, "sales"),);
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      newsales.push(doc.data())
+    }
+    )
+    setSales(newsales)
+
+  }
+
+
 
   //Handle manual number input
   const handleNumberChange = (e, itemID) => {
@@ -43,7 +60,7 @@ export default function Baker() {
         item.id === itemID ? { ...item, quantity: Math.max(0, item.quantity + val) } : item
       )
     );
-    updateDoc(doc(db, 'buns', itemID), { quantity: increment(val)})
+    updateDoc(doc(db, 'buns', itemID), { quantity: increment(val) })
   }
 
   const handleItemSelect = (itemID) => () => {
@@ -95,16 +112,16 @@ export default function Baker() {
   return (
     <div >
       <h1 className='my-5'>Inventory</h1>
-      <div className='grid grid-cols-2 lg:grid-cols-4  gap-3'>
+      <div className='grid grid-cols-2 md:grid-cols-4  gap-3'>
         {inventory.map((item) => (
-          <div key={item.id} className={`flex flex-col items-center border ${selectedInventory.includes(item.id) ? 'border-red-500' : 'border-gray-300'}`}
+          <div key={item.id} className={`flex flex-col items-center border ${selectedInventory.includes(item.id) ? 'border-red-500' : 'border-gray-300'} py-2`}
             onClick={handleItemSelect(item.id)}
           >
             <p>{item.name}</p>
             <div className='flex gap-3 p-3 z-0'>
-              <button className='rounded-full w-6 h-6 bg-blue-200' onClick={(e) => {handleQuickChange(e, item.id, 1)}}>+</button>
-              <input type="number" value={item.quantity} onClick={(e)=>e.stopPropagation()} onChange={(e)=> handleNumberChange(e, item.id)} className='bg-amber-100 max-w-l' />
-              <button className='rounded-full w-6 h-6 bg-red-200' onClick={(e) => {handleQuickChange(e, item.id, -1)}}>-</button>
+              <button className='rounded-full w-6 h-6 bg-blue-200' onClick={(e) => { handleQuickChange(e, item.id, 1) }}>+</button>
+              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-9 text-xl' />
+              <button className='rounded-full w-6 h-6 bg-red-200' onClick={(e) => { handleQuickChange(e, item.id, -1) }}>-</button>
             </div>
           </div>
         ))}
@@ -120,9 +137,8 @@ export default function Baker() {
           <button className='border border-pink-300 w-full' onClick={handleReset}>Restart</button>
         </div>
       </div>
-      <div>
-        <h1>History</h1>
-      </div>
+        <BakerSales sales={sales} />
+
     </div>
   )
 }
