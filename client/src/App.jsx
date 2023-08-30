@@ -1,12 +1,9 @@
-import { useState } from 'react'
 import './App.css'
 import {Link, Outlet} from 'react-router-dom'
 
 function App() {
   const menu = ['Baker', 'Baristar', 'Customer']
 
-  const handleClick = (e) => {
-  }
   
   return (
     <div className='w-4/5 m-auto'>

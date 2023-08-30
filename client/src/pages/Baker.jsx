@@ -27,7 +27,7 @@ export default function Baker() {
 
   const updatesales = async () => {
     const newsales = []
-    const q = query(collection(db, "sales"),);
+    const q = query(collection(db, "sales"), orderBy('receipt_date', 'desc'));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       newsales.push(doc.data())
@@ -88,7 +88,6 @@ export default function Baker() {
     selectedInventory.forEach((itemID) => {
       const itemRef = doc(db, 'buns', itemID)
       const item = updatedInventory.find((item) => item.id === itemID)
-      console.log(item)
       batch.update(itemRef, { quantity: item.quantity })
     })
     batch.commit()
@@ -111,30 +110,30 @@ export default function Baker() {
   };
   return (
     <div >
-      <h1 className='my-5'>Inventory</h1>
-      <div className='grid grid-cols-2 md:grid-cols-4  gap-3'>
+      <h1 className='my-5 text-2xl'>Inventory</h1>
+      <div className='grid grid-cols-2 md:grid-cols-4  gap-3 texl-xl'>
         {inventory.map((item) => (
           <div key={item.id} className={`flex flex-col items-center border ${selectedInventory.includes(item.id) ? 'border-red-500' : 'border-gray-300'} py-2`}
             onClick={handleItemSelect(item.id)}
           >
             <p>{item.name}</p>
-            <div className='flex gap-3 p-3 z-0'>
-              <button className='rounded-full w-6 h-6 bg-blue-200' onClick={(e) => { handleQuickChange(e, item.id, 1) }}>+</button>
-              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-9 text-xl' />
-              <button className='rounded-full w-6 h-6 bg-red-200' onClick={(e) => { handleQuickChange(e, item.id, -1) }}>-</button>
+            <div className='flex gap-3 p-3 z-0 justify-center'>
+              <button className='rounded-full w-12 h-12 bg-blue-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, 1) }}>+</button>
+              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-1/6 text-3xl pl-2' />
+              <button className='rounded-full w-12 h-12 bg-red-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, -1) }}>-</button>
             </div>
           </div>
         ))}
       </div>
-      <div className='flex w-full my-3 gap-2 bg-slate-400 p-3'>
+      <div className='flex w-full my-3 gap-2 bg-slate-400 p-3 text-xl'>
         <div className='flex w-5/6 gap-2'>
           {controllerOptions.map((option) => (
-            <button key={option} className='border border-gray-300 w-full' onClick={() => handleControllerClick(option)}>{option > 0 ? '+' + option : option}</button>
+            <button key={option} className='border border-gray-300 w-full text-3xl' onClick={() => handleControllerClick(option)}>{option > 0 ? '+' + option : option}</button>
           ))}
         </div>
-        <div className='flex flex-col w-1/6 gap-2'>
-          <button className='border border-gray-300 w-full' onClick={() => setSelectedInventory([])}>Clear Selection</button>
-          <button className='border border-pink-300 w-full' onClick={handleReset}>Restart</button>
+        <div className='flex flex-col w-1/6 gap-2 text-sm md:text-xl '>
+          <button className='border border-gray-300 w-full h-12' onClick={() => setSelectedInventory([])}>Clear Selection</button>
+          <button className='border border-pink-300 bg-pink-200 w-full h-12' onClick={handleReset}>Restart</button>
         </div>
       </div>
         <BakerSales sales={sales} />
