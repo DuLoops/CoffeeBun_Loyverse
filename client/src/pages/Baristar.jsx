@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import {db} from '../api/firebase'
-import {collection, query, doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { db } from '../api/firebase'
+import { collection, query, doc, onSnapshot, updateDoc, increment } from 'firebase/firestore'
 import { io } from "socket.io-client";
-
+import Cookies from '../components/Cookies';
 
 export default function Baristar() {
 
-  const [inventory, setInvetory] = useState([])
+  const [inventory, setInventory] = useState([])
   const [showInventory, setShowInventory] = useState(false)
   const [socket, setSocket] = useState(null); // WebSocket instance
   const [showQuant, setShowQuant] = useState(false)
+
+
   useEffect(() => {
     const newSocket = io('https://coffeebun-inventory-b2a46451fe1f.herokuapp.com/'); // Adjust the URL
 
@@ -27,6 +29,20 @@ export default function Baristar() {
     };
   }, []);
 
+  useEffect(() => {
+    const q = query(collection(db, "buns"))
+    const unsub = onSnapshot(q, (snapshot) => {
+      const upodatedInventory = []
+      snapshot.forEach((doc) => {
+        upodatedInventory.push({ id: doc.id, ...doc.data() })
+      })
+      setInventory(upodatedInventory.sort((a, b) => a.order - b.order))
+    })
+    return () => unsub()
+  }, [])
+
+
+
 
   const toggleInventory = () => {
     const updatedShowInventory = !showInventory; // Calculate the updated value
@@ -41,35 +57,44 @@ export default function Baristar() {
     if (socket) socket.send(showInventory, e.target.checked, filteredInventory); // Send the updated value to the server
   }
 
-  
-  useEffect(()=> {
-    const q = query(collection(db, "buns"))
-    const unsub = onSnapshot(q, (snapshot) => {
-      const upodatedInventory = []
-      snapshot.forEach((doc) => {
-        upodatedInventory.push({id: doc.id, ...doc.data()})
-      })
-      setInvetory(upodatedInventory.sort((a,b) => a.order - b.order))
-    })
-    return () => unsub()
-  }, [])
-  
-  const handleChange = (itemID) => (e) => {
-    if (e.target.value > -1 && e.target.value < 30) {
-    updateDoc(doc(db, "buns", itemID), {
-      quantity: parseInt(e.target.value)
-    })
+
+  //Handle manual number input
+  const handleNumberChange = (e, itemID) => {
+    e.stopPropagation()
+    if (isNaN(e.target.value)) return
+    const newQuantity = Math.max(0, parseInt(e.target.value))
+    setInventory((prevInventory) =>
+      prevInventory.map((item) =>
+        item.id === itemID ? { ...item, quantity: newQuantity } : item
+      )
+    );
+    updateDoc(doc(db, 'buns', itemID), { quantity: newQuantity })
   }
-  } 
+
+  //Handle quick plus and minus
+  const handleQuickChange = (e, itemID, val) => {
+    e.stopPropagation()
+    setInventory((prevInventory) =>
+      prevInventory.map((item) =>
+        item.id === itemID ? { ...item, quantity: Math.max(0, item.quantity + val) } : item
+      )
+    );
+    updateDoc(doc(db, 'buns', itemID), { quantity: increment(val) })
+  }
+
 
   return (
     <div >
-      <h1 className='my-5'>Inventory</h1>
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+      <h1 className='my-5'>Buns</h1>
+      <div className='grid grid-cols-2 md:grid-cols-4  gap-3 texl-xl'>
         {inventory.map((item) => (
-          <div key={item.id} className={`flex flex-col items-center border ${item.quantity > 0 ? 'bg-green-200' : ''}`}>
+          <div key={item.id} className={`flex flex-col items-center border ${item.quantity > 0 && 'border-green'}`}>
             <p>{item.name}</p>
-            <input type="number" className='text-2xl' value={item.quantity} onChange={handleChange(item.id)} min={0} max={100}/>
+            <div className='flex gap-3 p-3 z-0 justify-center'>
+              <button className='rounded-full w-12 h-12 bg-blue-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, 1) }}>+</button>
+              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-1/6 text-3xl pl-2' />
+              <button className='rounded-full w-12 h-12 bg-red-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, -1) }}>-</button>
+            </div>
           </div>
         ))}
       </div>
@@ -77,7 +102,8 @@ export default function Baristar() {
       <label>
         <input type='checkbox' checked={showQuant} onChange={handleSetQuant} className='ml-2 mr-1' />
         Show Quantity
-        </label>
+      </label>
+      <Cookies />
     </div>
   )
 }

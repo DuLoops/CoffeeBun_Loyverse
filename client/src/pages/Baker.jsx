@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { db } from '../api/firebase'
 import { collection, query, doc, onSnapshot, updateDoc, orderBy, increment, getDocs, writeBatch } from 'firebase/firestore'
 import BakerSales from '../components/BakerSales'
-
-
+import { resetServer } from '../api/inventoryServer'
 export default function Baker() {
 
   const [inventory, setInventory] = useState([])
@@ -14,12 +13,11 @@ export default function Baker() {
   useEffect(() => {
     const q = query(collection(db, "buns"), orderBy('order'))
     const unsub = onSnapshot(q, (snapshot) => {
-      const upodatedInventory = []
-      console.log('snap')
+      const updatedInventory = []
       snapshot.forEach((doc) => {
-        upodatedInventory.push({ id: doc.id, ...doc.data() })
+        updatedInventory.push({ id: doc.id, ...doc.data() })
       })
-      setInventory(upodatedInventory)
+      setInventory(updatedInventory)
       updatesales()
     })
     return () => unsub()
@@ -36,8 +34,6 @@ export default function Baker() {
     setSales(newsales)
 
   }
-
-
 
   //Handle manual number input
   const handleNumberChange = (e, itemID) => {
@@ -93,9 +89,10 @@ export default function Baker() {
     batch.commit()
   }
 
-  const handleReset = () => {
+  const handleSetTo0 = async () => {
     const confirmed = window.confirm('Are you sure you want to reset all quantities to 0?');
     if (confirmed) {
+
       const resetInventory = inventory.map((item) => ({ ...item, quantity: 0 }));
       setInventory(resetInventory);
 
@@ -105,9 +102,60 @@ export default function Baker() {
         batch.update(itemRef, { quantity: item.quantity });
       });
 
-      batch.commit();
+      try {
+        await batch.commit();
+        await resetServer();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+  };
+
+  const handleReset = async () => {
+    const confirmed = window.confirm('New day?');
+    if (confirmed) {
+      const resetInventory = inventory.map((item) => {
+        switch (item.id) {
+          case 'og':
+            return { ...item, quantity: 12 };
+          case 'mi':
+          case 'gt':
+          case 'eg':
+            return { ...item, quantity: 4 };
+          case 'co':
+          case 'cr':
+            return { ...item, quantity: 3 };
+          case 'cc':
+          case 'cho':
+          case 're':
+          case 'nu':
+            return { ...item, quantity: 6 };
+          case 'ci':
+            return { ...item, quantity: 2 };
+          case 'ga':
+            return { ...item, quantity: 4 };
+          default:
+            return {...item, quantity: 0}
+        }
+      });
+      setInventory(resetInventory);
+      const batch = writeBatch(db);
+      resetInventory.forEach((item) => {
+        const itemRef = doc(db, 'buns', item.id);
+        batch.update(itemRef, { quantity: item.quantity });
+      });
+
+      try {
+        await batch.commit();
+        await resetServer();
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
+
+
   return (
     <div >
       <h1 className='my-5 text-2xl'>Inventory</h1>
@@ -133,10 +181,13 @@ export default function Baker() {
         </div>
         <div className='flex flex-col w-1/6 gap-2 text-sm md:text-xl '>
           <button className='border border-gray-300 w-full h-12' onClick={() => setSelectedInventory([])}>Clear Selection</button>
-          <button className='border border-pink-300 bg-pink-200 w-full h-12' onClick={handleReset}>Restart</button>
+          <div className='flex gap-2'>
+            <button className='border border-pink-300 bg-pink-200 w-full h-12' onClick={handleSetTo0}>Set to 0</button>
+            <button className='border border-red-300 bg-red-200 w-full h-12' onClick={handleReset}>New Day</button>
+          </div>
         </div>
       </div>
-        <BakerSales sales={sales} />
+      <BakerSales sales={sales} />
 
     </div>
   )
