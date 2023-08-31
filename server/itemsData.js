@@ -20,9 +20,6 @@ const itemsData = {
     "4696ad6f-e819-43f5-ab1b-405bfd74266c": "cho",
     "ca09a1cb-14f6-47c7-863e-5315ea96aac7": "cc",
     "3f0c18ae-78f9-42a1-9163-532458b4347e": "og",
-    //ogSandwich combo
-    "4cb2afe0-f9fe-46e2-a46a-f6d5334a5d3a": "og",
-
 }
 
 const specialItemsData = {
@@ -35,7 +32,14 @@ const specialItemsData = {
     //ice-cream-bun
     "6eefba53-67d6-4b34-9b97-7c83aab220bb": "og",
     //combo A
-    "55380ad0-5d16-44e2-96dc-d1e7e5132848" :"og"
+    "55380ad0-5d16-44e2-96dc-d1e7e5132848" :"og",
+    //ogSandwich combo A
+    "4cb2afe0-f9fe-46e2-a46a-f6d5334a5d3a": "og",
+    //ogSandwich combo B
+    "dc572165-504e-45cb-b20b-a65d4a59fb8e": "og",
+    //ogSandwich combo 3
+    "4cb2afe0-f9fe-46e2-a46a-f6d5334a5d3a": "og",
+
 }
 
 const iBunModifiers = {
@@ -57,6 +61,10 @@ const sBunModifiers = {
     "e40bf1d2-0671-4c6d-b645-b78edd6e9110": "ga",
     "ba3acb79-3bb8-45cb-b626-f3b2282541ec": "mi",
     "2eb6c817-c7e3-49eb-9a8c-8d758121aae6": "cr",
+}
+
+const resetBunData = {
+
 }
 
 export { itemsData, specialItemsData, iBunModifiers, sBunModifiers}
