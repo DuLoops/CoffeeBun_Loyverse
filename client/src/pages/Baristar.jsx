@@ -92,7 +92,7 @@ export default function Baristar() {
             <p>{item.name}</p>
             <div className='flex gap-3 p-3 z-0 justify-center'>
               <button className='rounded-full w-12 h-12 bg-blue-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, 1) }}>+</button>
-              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-1/6 text-3xl pl-2' />
+              <input type="number" value={item.quantity} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNumberChange(e, item.id)} className='bg-amber-100 w-11  text-3xl pl-2' />
               <button className='rounded-full w-12 h-12 bg-red-200 text-2xl' onClick={(e) => { handleQuickChange(e, item.id, -1) }}>-</button>
             </div>
           </div>

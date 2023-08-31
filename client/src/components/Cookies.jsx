@@ -25,7 +25,7 @@ export default function Cookies() {
             <p>Cookies</p>
             <div className='grid grid-cols-4 gap-2 m-2'>
                 {cookies.map((cookie) => (
-                    <div key={cookie.name} className={`items-center text-xl border-2 ${cookie.available ? 'border-green-500' : 'border-red-100 text-slate-300'} `} onClick={() => handleClick(cookie.name)}>
+                    <div key={cookie.name} className={`items-center text-xl border-2 ${cookie.available ? 'border-green-500' : 'border-red-100 text-slate-300'} py-1`} onClick={() => handleClick(cookie.name)}>
                         <p>{cookie.name}</p>
                     </div>
                 ))}
